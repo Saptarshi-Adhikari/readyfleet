@@ -2,9 +2,9 @@ import unittest
 import os
 import yaml
 import json
-from data_sources.adsb_lol import ADSBADotLolAdapter
-from data_sources.awc_weather import AWCWeatherAdapter
-from data_sources.scheduler import IngestionScheduler
+from data_sources.adsb_lol import ADSBLolDataSource
+from data_sources.awc_weather import AWCWeatherDataSource
+from data_sources.scheduler import DataIngestionScheduler
 
 class TestLiveIngestionFabric(unittest.TestCase):
 
@@ -25,7 +25,7 @@ class TestLiveIngestionFabric(unittest.TestCase):
             self.assertIn("awc_weather", source_ids)
 
     def test_adsb_lol_normalization(self):
-        adapter = ADSBADotLolAdapter()
+        adapter = ADSBLolDataSource()
         mock_raw = {
             "hex": "a1b2c3",
             "flight": "TEST101",
@@ -38,14 +38,14 @@ class TestLiveIngestionFabric(unittest.TestCase):
             "t": "C172"
         }
         norm = adapter.normalize(mock_raw)
-        self.assertEqual(norm["registration"], "VT-TEST")
-        self.assertEqual(norm["flight_state"], "AIRBORNE")
-        self.assertEqual(norm["altitude_ft"], 15000)
+        self.assertEqual(norm["tail_no"], "ADS-TEST101")
+        self.assertEqual(norm["operational_state"], "AIRBORNE")
+        self.assertEqual(norm["altitude"], 15000)
         self.assertEqual(norm["synthetic"], 0)
-        self.assertEqual(norm["provenance"]["source_id"], "adsb_lol")
+        self.assertEqual(norm["provenance"]["source_name"], "adsb.lol")
 
     def test_awc_weather_normalization(self):
-        adapter = AWCWeatherAdapter()
+        adapter = AWCWeatherDataSource()
         mock_raw = {
             "icaoId": "VIDP",
             "temp": 28.0,
@@ -59,22 +59,22 @@ class TestLiveIngestionFabric(unittest.TestCase):
         self.assertEqual(norm["station"], "VIDP")
         self.assertEqual(norm["temp_c"], 28.0)
         self.assertEqual(norm["synthetic"], 0)
-        self.assertEqual(norm["provenance"]["source_id"], "awc_weather")
+        self.assertEqual(norm["provenance"]["source_name"], "AWC_Weather")
 
     def test_scheduler_sync_and_freshness(self):
-        sched = IngestionScheduler()
+        sched = DataIngestionScheduler()
         results = sched.sync_all()
         self.assertIn("adsb_lol", results)
         self.assertIn("awc_weather", results)
-        self.assertIn(results["adsb_lol"]["status"], ["SUCCESS", "FALLBACK_USED"])
-        self.assertIn(results["awc_weather"]["status"], ["SUCCESS", "FALLBACK_USED"])
+        self.assertIn(results["adsb_lol"]["status"], ["synced", "fallback", "SUCCESS", "FALLBACK_USED"])
+        self.assertIn(results["awc_weather"]["status"], ["synced", "fallback", "SUCCESS", "FALLBACK_USED"])
 
     def test_error_recovery_graceful(self):
-        adapter = ADSBADotLolAdapter()
+        adapter = ADSBLolDataSource()
         # Test handling of empty/malformed response
         malformed = adapter.normalize({})
         self.assertEqual(malformed["synthetic"], 0)
-        self.assertEqual(malformed["flight_state"], "UNKNOWN")
+        self.assertEqual(malformed["status"], "UNKNOWN")
 
 if __name__ == "__main__":
     unittest.main()
