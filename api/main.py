@@ -23,6 +23,7 @@ app = FastAPI(
 )
 
 from data_sources.scheduler import scheduler_instance
+from data_sources.manager import get_active_data_sources
 from fastapi.responses import StreamingResponse
 import asyncio
 
