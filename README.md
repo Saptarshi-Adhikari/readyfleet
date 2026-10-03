@@ -1,77 +1,106 @@
-# READYFLEET — Master Execution Index & Navigation
+# READYFLEET — Master Execution Index & SIH 2026 Judge Verification Guide
 
-Welcome to **READYFLEET** (SIH26249 — Air Power: Predictive Maintenance & Fleet Availability). This document serves as the main index for project documentation, build execution tasks, and implementation steps.
-
----
-
-## 📄 Key Project Files
-
-1. **[TASKS.md](file:///c:/Users/Saptarshi/Desktop/MainFolder/Hackathon/readyfleet/v1/readyfleet/TASKS.md)**  
-   Contains the complete 6-phase, 19-task checklist (**T1 through T19**) and complete project directory structure map.
-
-2. **[STEP_BY_STEP.md](file:///c:/Users/Saptarshi/Desktop/MainFolder/Hackathon/readyfleet/v1/readyfleet/STEP_BY_STEP.md)**  
-   Provides detailed command-line instructions, prerequisites, step-by-step build commands, and judge verification criteria.
-
-3. **[`docs/`](file:///c:/Users/Saptarshi/Desktop/MainFolder/Hackathon/readyfleet/v1/readyfleet/docs)**  
-   Original project specification PDFs:
-   - [`00-MASTER-PRD.pdf`](file:///c:/Users/Saptarshi/Desktop/MainFolder/Hackathon/readyfleet/v1/readyfleet/docs/00-MASTER-PRD.pdf) — Master Product Requirements Document & Literature Review
-   - [`01-product-overview.pdf`](file:///c:/Users/Saptarshi/Desktop/MainFolder/Hackathon/readyfleet/v1/readyfleet/docs/01-product-overview.pdf) — High-level Vision & Core USP
-   - [`02-features-spec.pdf`](file:///c:/Users/Saptarshi/Desktop/MainFolder/Hackathon/readyfleet/v1/readyfleet/docs/02-features-spec.pdf) — P0, P1, P2 Feature specifications
-   - [`03-architecture-techstack.pdf`](file:///c:/Users/Saptarshi/Desktop/MainFolder/Hackathon/readyfleet/v1/readyfleet/docs/03-architecture-techstack.pdf) — System architecture & tech stack rationale
-   - [`04-data-models-and-logic.pdf`](file:///c:/Users/Saptarshi/Desktop/MainFolder/Hackathon/readyfleet/v1/readyfleet/docs/04-data-models-and-logic.pdf) — SQLite schema, generator logic & math algorithms
-   - [`05-build-plan-tasks.pdf`](file:///c:/Users/Saptarshi/Desktop/MainFolder/Hackathon/readyfleet/v1/readyfleet/docs/05-build-plan-tasks.pdf) — Original 36-hour build schedule
-   - [`06-demo-and-judge-qa.pdf`](file:///c:/Users/Saptarshi/Desktop/MainFolder/Hackathon/readyfleet/v1/readyfleet/docs/06-demo-and-judge-qa.pdf) — Scripted 5-minute presentation script & Q&A defense
+Welcome to **READYFLEET** (SIH 2026 Problem Statement **SIH26249 — Air Power: Predictive Maintenance & Fleet Availability**).
 
 ---
 
-## 🎯 Project Summary
-
-READYFLEET solves aircraft availability bottlenecks by fusing 5 data streams into an overarching decision layer:
-- **HUMS / IoT signals** (Engine/component health degradation curves)
-- **Technical Records** (Maintenance history & cycle metrics)
-- **Spares Inventory** (Parts availability & lead times)
-- **Crew Capacity** (Trade-wise technician schedules)
-- **Sortie Demand** (Operational mission requirements & priority scoring)
-
----
-
-## 🎯 System Positioning & Data Provenance Architecture
+## 🎯 System Positioning
 
 READYFLEET operates strictly as a:
-> **Digital Twin Prototype / Simulated Fleet Twin with Live Public Operational & Weather Data**
+> **SIH DEMO-READY / PROTOTYPE-READY: Digital Twin Prototype / Simulated Fleet Twin with Live Public Operational & Weather Data**
 
-### Data Stream Classification & Provenance Boundaries:
-- **REAL (`LIVE_REAL` / `HISTORICAL_REAL`):**
-  - Live Public Flight Operations (`adsb.lol` API — ADS-B positional tracking)
-  - Live Aviation Weather (`AWC Weather API` — NOAA METAR environmental observations)
-  - Historical Maintenance Records (`FAA SDRS` — Service Difficulty Reporting System)
-  - Historical Safety & Incident Information (`NTSB` Aviation Accident Database)
-- **BENCHMARK (`BENCHMARK_SYNTHETIC`):**
-  - RUL Model Training (`NASA N-CMAPSS` Turbofan Engine Degradation Dataset)
-- **SYNTHETIC / CONFIGURED (`CONFIGURED_SYNTHETIC`):**
-  - Defence HUMS Telemetry Placeholder
-  - Crew Capacity & Skill Mix
-  - Spares & Supply Chain Inventory
-  - Authoritative Fleet Readiness Classification (`MC` / `PMC` / `NMC`)
-
-*Architectural Boundary Note:* Authorized defence HUMS and maintenance-management feeds can replace these synthetic fallback streams directly without requiring any changes to the overarching decision engine or web console interface.
+It demonstrates an AI-enabled fleet digital-twin platform with live public operational/weather synchronization, benchmark-based health intelligence, and strict provenance and decision-boundary controls for future authorized defence integration.
 
 ---
 
-## ⚡ Quick Start Command
+## 📊 Data-Source Classification & Reality Matrix
 
-To initialize project dependencies and execute the complete pipeline once implementation begins:
+| Stream | Current Source | Reality Classification | Authorization / Status |
+| :--- | :--- | :--- | :--- |
+| **Operations** | `adsb.lol` API | `LIVE REAL PUBLIC` | Verified / Active Open Data |
+| **Weather** | `AWC Weather API` | `LIVE REAL` | Verified / Active NOAA METAR |
+| **Maintenance** | `FAA SDRS` | `HISTORICAL REAL` | Verified / Historical Batch |
+| **Health / RUL ML** | `NASA N-CMAPSS` | `BENCHMARK` | Benchmark Turbofan Dataset |
+| **Crew Capacity** | Current Prototype | `SYNTHETIC` | Prototype Configured Stream |
+| **Spares Inventory** | Current Prototype | `SYNTHETIC` | Prototype Configured Stream |
+| **Defence MC/PMC/NMC** | Current Prototype | `CONFIGURED SYNTHETIC` | Decision Boundary Isolated |
+| **Defence HUMS Telemetry** | None Publicly Integrated | `NOT AVAILABLE` | Requires Authorized Defence Feed |
 
+---
+
+## 🏗️ System Architecture Flow
+
+```
+External APIs (adsb.lol / AWC Weather)
+  ↓
+Source Adapters & Rate Limiters (data_sources/adsb_lol.py, awc_weather.py)
+  ↓
+Validation & Normalization (data_sources/base.py)
+  ↓
+Provenance Engine (source_id, ingestion_ts, synthetic=0)
+  ↓
+SQLite Persistence & Trusted Identity Check (core/identity.py)
+  ↓
+Digital Twin Stream Registry (twins maintain separate stream provenance)
+  ↓
+Decision Engine (core/aggregator.py — MC/PMC/NMC isolated from public ADS-B/weather)
+  ↓
+FastAPI SSE Event Bus (api/main.py — broadcast_sse_event)
+  ↓
+React Console (frontend/src/hooks/useLiveEvents.ts — SSE subscriber with deduplication)
+```
+
+---
+
+## ⚡ Clean Reproduction & Startup Guide
+
+### Prerequisites
+- Python 3.11+
+- Node.js 18+ & npm
+
+### 1. Backend Startup
 ```bash
-# Install dependencies
+# Navigate to project root
+cd readyfleet
+
+# Install Python dependencies
 pip install fastapi uvicorn scikit-learn pandas numpy pytest pydantic pyyaml
 
-# Run database setup & data generator
-python gen/db.py && python gen/generate.py
+# Initialize database & benchmark models
+python gen/db.py && python gen/generate.py && python models/train.py && python models/infer.py
 
-# Train ML model & execute inference
-python models/train.py && python models/infer.py
-
-# Launch application server
-uvicorn api.main:app --reload --host 127.0.0.1 --port 8000
+# Launch FastAPI backend server on port 8080 (starts automatic background ingestion workers)
+python -m uvicorn api.main:app --host 127.0.0.1 --port 8080
 ```
+
+### 2. Frontend Startup
+```bash
+# Navigate to frontend directory
+cd frontend
+
+# Install dependencies & start Vite dev server
+npm install
+npm run dev -- --port 5173
+```
+Open `http://localhost:5173` in your browser.
+
+---
+
+## 🧪 Canonical Verification Command
+
+To run the complete automated test suite (35 unit & integration tests covering identity safety, live ingestion fabric, OpenSky neutral semantics, decision boundaries, API endpoints, core aggregator, and RUL ML pipeline):
+
+```bash
+python -m unittest discover -s tests -p "test_*.py"
+```
+
+To build production frontend assets:
+```bash
+cd frontend && npm run build
+```
+
+---
+
+## 🔌 Production Extension Rationale
+
+Authorized defence HUMS recorders, technician schedule databases, and spare parts ERP feeds can replace the synthetic placeholder streams directly via the `BaseDataSource` abstraction without requiring any changes to the overarching decision engine or web console interface.
