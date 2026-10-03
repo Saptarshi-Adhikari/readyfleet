@@ -21,9 +21,19 @@ app = FastAPI(
     version="1.0.0"
 )
 
+from data_sources.manager import get_active_data_sources
+
 @app.get("/api/health")
 def health_check():
     return {"status": "ok", "service": "READYFLEET API", "data_class": "synthetic"}
+
+@app.get("/api/data-mode")
+def get_data_mode():
+    _, prov = get_active_data_sources()
+    return {
+        "data_class": "hybrid_prototype",
+        "provenance": prov
+    }
 
 @app.get("/api/fleet/status", response_model=FleetStatusResponse)
 def get_fleet_status():
