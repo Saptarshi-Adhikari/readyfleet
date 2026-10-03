@@ -123,3 +123,14 @@ CREATE TABLE IF NOT EXISTS audit_log (
     row_hash TEXT NOT NULL,
     synthetic INTEGER NOT NULL DEFAULT 1
 );
+
+CREATE TABLE IF NOT EXISTS digital_twin (
+    twin_id TEXT PRIMARY KEY,
+    tail_no TEXT UNIQUE NOT NULL,
+    twin_state TEXT NOT NULL CHECK (twin_state IN ('SIMULATED', 'SYNCHRONIZED', 'OFFLINE')),
+    data_mode TEXT NOT NULL DEFAULT 'SYNTHETIC',
+    last_sync_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    sync_status TEXT NOT NULL DEFAULT 'SYNCED-SIMULATION',
+    synthetic INTEGER NOT NULL DEFAULT 1,
+    FOREIGN KEY (tail_no) REFERENCES aircraft (tail_no) ON DELETE CASCADE
+);

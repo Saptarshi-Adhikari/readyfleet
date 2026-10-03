@@ -100,6 +100,16 @@ def generate_all_data(db_path: str = DB_PATH, seed: int = SEED) -> None:
                 sensor_rows
             )
 
+        # Create Digital Twin Registry Instance
+        twin_id = f"DT-{tail_no}"
+        now_str = datetime.datetime.now().isoformat()
+        with conn:
+            conn.execute(
+                "INSERT INTO digital_twin (twin_id, tail_no, twin_state, data_mode, last_sync_ts, sync_status, synthetic) "
+                "VALUES (?, ?, 'SIMULATED', 'SYNTHETIC', ?, 'SYNCED-SIMULATION', 1)",
+                (twin_id, tail_no, now_str)
+            )
+
     # 4. Populate 7-Day Sortie Demand Schedule
     today = datetime.date.today()
     sortie_rows = []

@@ -20,6 +20,7 @@ def load_fleet_state(db_path: str = DB_PATH) -> Dict[str, Any]:
     spares = pd.read_sql_query("SELECT * FROM spare", conn)
     crew = pd.read_sql_query("SELECT * FROM crew", conn)
     sorties = pd.read_sql_query("SELECT * FROM sortie", conn)
+    twins = pd.read_sql_query("SELECT * FROM digital_twin", conn)
     
     # Get latest predictions per component
     pred_query = """
@@ -40,7 +41,8 @@ def load_fleet_state(db_path: str = DB_PATH) -> Dict[str, Any]:
         "spares": spares,
         "crew": crew,
         "sorties": sorties,
-        "predictions": predictions
+        "predictions": predictions,
+        "twins": twins
     }
 
 def clone_state(state: Dict[str, Any]) -> Dict[str, Any]:
@@ -50,5 +52,6 @@ def clone_state(state: Dict[str, Any]) -> Dict[str, Any]:
         "spares": state["spares"].copy(deep=True),
         "crew": state["crew"].copy(deep=True),
         "sorties": state["sorties"].copy(deep=True),
-        "predictions": state["predictions"].copy(deep=True)
+        "predictions": state["predictions"].copy(deep=True),
+        "twins": state["twins"].copy(deep=True)
     }
