@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
+from typing import List, Dict, Any
 import os
 
 from api.schemas import (
@@ -24,18 +25,6 @@ app = FastAPI(
 from data_sources.scheduler import scheduler_instance
 from fastapi.responses import StreamingResponse
 import asyncio
-
-@app.on_event("startup")
-async def start_background_ingestion():
-    async def periodic_ingestion():
-        while True:
-            try:
-                scheduler_instance.sync_all()
-            except Exception as e:
-                print(f"[BACKGROUND INGESTION WORKER ERROR]: {e}")
-            await asyncio.sleep(30)
-            
-    asyncio.create_task(periodic_ingestion())
 
 @app.get("/api/health")
 def health_check():
@@ -97,18 +86,61 @@ def get_data_sources_registry():
         ]
     }
 
+import json
+import datetime
+
+# Active SSE subscriber queues
+sse_subscribers: List[asyncio.Queue] = []
+
+async def broadcast_sse_event(event_type: str, source_id: str, data: Dict[str, Any]):
+    evt_payload = {
+        "event": event_type,
+        "source_id": source_id,
+        "timestamp": datetime.datetime.now().isoformat(),
+        "data": data
+    }
+    msg = f"data: {json.dumps(evt_payload)}\n\n"
+    for q in sse_subscribers:
+        await q.put(msg)
+
+@app.on_event("startup")
+async def start_background_ingestion():
+    async def periodic_ingestion():
+        while True:
+            try:
+                results = scheduler_instance.sync_all()
+                await broadcast_sse_event("source_status_update", "scheduler", results)
+                await broadcast_sse_event("operational_update", "adsb_lol", {"freshness": scheduler_instance.freshness["adsb_lol"]})
+                await broadcast_sse_event("weather_update", "awc_weather", {"freshness": scheduler_instance.freshness["awc_weather"]})
+            except Exception as e:
+                print(f"[BACKGROUND INGESTION WORKER ERROR]: {e}")
+            await asyncio.sleep(15)
+            
+    asyncio.create_task(periodic_ingestion())
+
 @app.post("/api/data-sources/sync-all")
-def sync_all_data_sources():
+async def sync_all_data_sources():
     results = scheduler_instance.sync_all()
+    await broadcast_sse_event("source_status_update", "manual_trigger", results)
     return {"status": "complete", "results": results}
 
 @app.get("/api/stream/events")
 async def sse_event_stream():
     async def event_generator():
-        while True:
-            await asyncio.sleep(15)
-            data = json.dumps({"event": "ping", "ts": datetime.datetime.now().isoformat()})
-            yield f"data: {data}\n\n"
+        q = asyncio.Queue()
+        sse_subscribers.append(q)
+        try:
+            # Initial connection ping
+            init_msg = json.dumps({"event": "connected", "ts": datetime.datetime.now().isoformat()})
+            yield f"data: {init_msg}\n\n"
+            while True:
+                msg = await q.get()
+                yield msg
+        except asyncio.CancelledError:
+            pass
+        finally:
+            if q in sse_subscribers:
+                sse_subscribers.remove(q)
 
     return StreamingResponse(event_generator(), media_type="text/event-stream")
 

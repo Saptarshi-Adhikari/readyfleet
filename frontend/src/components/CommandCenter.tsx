@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { AlertTriangle, ArrowUpRight, Wrench, TrendingDown } from 'lucide-react';
+import { AlertTriangle, ArrowUpRight, Wrench, TrendingDown, Radio } from 'lucide-react';
+import { useLiveEvents } from '../hooks/useLiveEvents';
 
 interface FleetStatus {
   total_tails: number;
@@ -23,6 +24,15 @@ export const CommandCenter: React.FC<{ onSelectTail: (tail: string) => void }> =
   const [forecast, setForecast] = useState<number[]>([]);
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [loading, setLoading] = useState(true);
+  const [lastSyncTime, setLastSyncTime] = useState<string>('JUST NOW');
+
+  const { isConnected } = useLiveEvents((evt) => {
+    if (evt.event === 'operational_update' || evt.event === 'weather_update' || evt.event === 'source_status_update') {
+      setLastSyncTime(new Date().toLocaleTimeString());
+      // Refresh fleet status silently on event
+      fetch('/api/fleet/status').then(r => r.json()).then(data => setStatus(data)).catch(() => {});
+    }
+  });
 
   useEffect(() => {
     Promise.all([
@@ -56,9 +66,29 @@ export const CommandCenter: React.FC<{ onSelectTail: (tail: string) => void }> =
           <h2 className="text-xl font-bold tracking-wide text-slate-100 font-mono">COMMAND CENTER // OPERATIONAL OVERVIEW</h2>
           <p className="text-xs text-slate-400 font-mono">Air Power Fleet Availability & Readiness Dashboard</p>
         </div>
-        <div className="flex items-center space-x-2 text-xs font-mono bg-slate-900 px-3 py-1.5 border border-slate-800 rounded">
-          <span className="text-slate-400">STATUS:</span>
-          <span className="text-emerald-400 font-bold">READY</span>
+        <div className="flex items-center space-x-3 text-xs font-mono">
+          <div className="flex items-center space-x-2 bg-slate-900 px-3 py-1.5 border border-slate-800 rounded">
+            <Radio className={`w-3.5 h-3.5 ${isConnected ? 'text-emerald-400 animate-pulse' : 'text-slate-500'}`} />
+            <span className="text-slate-400">STREAM:</span>
+            <span className={isConnected ? 'text-emerald-400 font-bold' : 'text-amber-400 font-bold'}>
+              {isConnected ? 'LIVE SSE (AUTO-SYNC)' : 'RECONNECTING...'}
+            </span>
+          </div>
+          <div className="text-slate-400 bg-slate-900 px-3 py-1.5 border border-slate-800 rounded">
+            SYNCED: <span className="text-sky-300 font-bold">{lastSyncTime}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Stream Provenance Strip */}
+      <div className="bg-[#0b101d] border border-slate-800 p-2.5 rounded text-[11px] font-mono flex items-center justify-between overflow-x-auto space-x-4">
+        <div className="flex items-center space-x-2">
+          <span className="text-slate-500 font-bold uppercase">Stream Provenance:</span>
+          <span className="px-2 py-0.5 bg-emerald-950/60 border border-emerald-800 text-emerald-400 rounded">OPERATIONS ● LIVE REAL (adsb.lol)</span>
+          <span className="px-2 py-0.5 bg-emerald-950/60 border border-emerald-800 text-emerald-400 rounded">WEATHER ● LIVE REAL (AWC)</span>
+          <span className="px-2 py-0.5 bg-sky-950/60 border border-sky-800 text-sky-400 rounded">MAINTENANCE ● HISTORICAL REAL (FAA SDR)</span>
+          <span className="px-2 py-0.5 bg-amber-950/60 border border-amber-800 text-amber-400 rounded">HEALTH ● BENCHMARK (N-CMAPSS)</span>
+          <span className="px-2 py-0.5 bg-slate-900 border border-slate-700 text-slate-400 rounded">LOGISTICS ● SYNTHETIC</span>
         </div>
       </div>
 
