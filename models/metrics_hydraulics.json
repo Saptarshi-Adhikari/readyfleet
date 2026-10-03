@@ -1,0 +1,9 @@
+{
+  "comp_class": "hydraulics",
+  "rmse": 40.11677095332124,
+  "mae": 32.61462927523684,
+  "baseline_rmse": 42.476148178491606,
+  "baseline_mae": 38.21672475554265,
+  "train_samples": 3756,
+  "test_samples": 990
+}

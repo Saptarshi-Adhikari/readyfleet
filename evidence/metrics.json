@@ -1,0 +1,84 @@
+{
+  "seed": 42,
+  "db_sha256": "cf9d0e28eaa8db925eb977649662f1f28d5b09098501fcb6c56bfa0198f35173",
+  "generated_at": "2026-10-04T01:11:15.147406",
+  "ml_eval_summary": {
+    "engine": {
+      "comp_class": "engine",
+      "rmse": 45.94211678113149,
+      "mae": 37.79544118946634,
+      "baseline_rmse": 41.940123379808504,
+      "baseline_mae": 37.96656870171187,
+      "train_samples": 4025,
+      "test_samples": 1189
+    },
+    "avionics": {
+      "comp_class": "avionics",
+      "rmse": 37.228249351416125,
+      "mae": 29.714442652580065,
+      "baseline_rmse": 42.34235321462739,
+      "baseline_mae": 38.1520677620664,
+      "train_samples": 4047,
+      "test_samples": 1064
+    },
+    "hydraulics": {
+      "comp_class": "hydraulics",
+      "rmse": 40.11677095332124,
+      "mae": 32.61462927523684,
+      "baseline_rmse": 42.476148178491606,
+      "baseline_mae": 38.21672475554265,
+      "train_samples": 3756,
+      "test_samples": 990
+    },
+    "airframe": {
+      "comp_class": "airframe",
+      "rmse": 40.923744004836614,
+      "mae": 32.3933454451461,
+      "baseline_rmse": 43.05609957570109,
+      "baseline_mae": 37.85338895186277,
+      "train_samples": 4010,
+      "test_samples": 825
+    }
+  },
+  "timestamp": "2026-10-04T01:14:21.190553",
+  "db_sha256_hash": "3b299498af29921da329e27bde30edc653ff26653d8d3cea9f5157236d8ee337",
+  "eval_summary": {
+    "engine": {
+      "comp_class": "engine",
+      "rmse": 45.94211678113149,
+      "mae": 37.79544118946634,
+      "baseline_rmse": 41.940123379808504,
+      "baseline_mae": 37.96656870171187,
+      "train_samples": 4025,
+      "test_samples": 1189
+    },
+    "avionics": {
+      "comp_class": "avionics",
+      "rmse": 37.228249351416125,
+      "mae": 29.714442652580065,
+      "baseline_rmse": 42.34235321462739,
+      "baseline_mae": 38.1520677620664,
+      "train_samples": 4047,
+      "test_samples": 1064
+    },
+    "hydraulics": {
+      "comp_class": "hydraulics",
+      "rmse": 40.11677095332124,
+      "mae": 32.61462927523684,
+      "baseline_rmse": 42.476148178491606,
+      "baseline_mae": 38.21672475554265,
+      "train_samples": 3756,
+      "test_samples": 990
+    },
+    "airframe": {
+      "comp_class": "airframe",
+      "rmse": 40.923744004836614,
+      "mae": 32.3933454451461,
+      "baseline_rmse": 43.05609957570109,
+      "baseline_mae": 37.85338895186277,
+      "train_samples": 4010,
+      "test_samples": 825
+    }
+  },
+  "data_class": "synthetic"
+}

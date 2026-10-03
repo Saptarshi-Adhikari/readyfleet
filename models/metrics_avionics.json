@@ -1,0 +1,9 @@
+{
+  "comp_class": "avionics",
+  "rmse": 37.228249351416125,
+  "mae": 29.714442652580065,
+  "baseline_rmse": 42.34235321462739,
+  "baseline_mae": 38.1520677620664,
+  "train_samples": 4047,
+  "test_samples": 1064
+}

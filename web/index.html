@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>READYFLEET — Fleet Availability Decision Layer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="banner-synthetic">⚠️ DEMO MODE — ALL DATA IS SYNTHETIC (SIH26249) ⚠️</div>
+    
+    <header>
+        <h1>READYFLEET</h1>
+        <nav>
+            <button id="nav-fleet" class="active">Fleet Board</button>
+            <button id="nav-forecast">7-Day Forecast & What-If</button>
+            <button id="nav-cannibal">Cannibalization Advisor</button>
+            <button id="nav-audit">Audit Trail</button>
+        </nav>
+    </header>
+
+    <main>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>TOTAL TAILS</h3>
+                <div class="value" id="stat-total">40</div>
+            </div>
+            <div class="stat-card">
+                <h3>MISSION CAPABLE (MC)</h3>
+                <div class="value" style="color: #4ade80;" id="stat-mc">--</div>
+            </div>
+            <div class="stat-card">
+                <h3>PARTIAL MC (PMC)</h3>
+                <div class="value" style="color: #facc15;" id="stat-pmc">--</div>
+            </div>
+            <div class="stat-card">
+                <h3>NON-MISSION CAPABLE (NMC)</h3>
+                <div class="value" style="color: #f87171;" id="stat-nmc">--</div>
+            </div>
+        </div>
+
+        <section id="view-fleet" class="canvas-container">
+            <h2 style="margin-bottom: 1rem; color: #38bdf8;">Fleet Availability Grid (Canvas 2D)</h2>
+            <canvas id="canvas-fleet"></canvas>
+        </section>
+
+        <section id="view-forecast" class="panel" style="display: none;">
+            <h2>7-Day Mission Capable Forecast & What-If Simulator</h2>
+            <canvas id="canvas-forecast" style="height: 240px; margin-bottom: 1rem;"></canvas>
+            
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                <button class="btn-primary" id="btn-expedite">Apply Expedite Spares Lever</button>
+                <div id="whatif-delta" style="font-weight: 600; color: #38bdf8;"></div>
+            </div>
+        </section>
+
+        <section id="view-cannibal" class="panel" style="display: none;">
+            <h2>Cannibalization Trade-Off Advisor</h2>
+            <p style="margin-bottom: 1rem; color: #94a3b8;">Select a donor airframe (NMC, lower priority) to transfer component to recipient.</p>
+            <div style="display: flex; gap: 1rem;">
+                <input type="text" id="cann-donor" placeholder="Donor Tail (e.g. SYN-04)" style="padding: 8px; background: #0f172a; border: 1px solid #334155; color: #fff;">
+                <input type="text" id="cann-rec" placeholder="Recipient Tail (e.g. SYN-01)" style="padding: 8px; background: #0f172a; border: 1px solid #334155; color: #fff;">
+                <button class="btn-primary" id="btn-cann-eval">Evaluate Proposal</button>
+            </div>
+            <div id="cann-result" style="margin-top: 1rem; padding: 1rem; background: #0f172a; border-radius: 4px;"></div>
+        </section>
+
+        <section id="view-audit" class="panel" style="display: none;">
+            <h2>Tamper-Evident Hash-Chained Audit Trail</h2>
+            <button class="btn-primary" id="btn-verify-audit" style="margin-bottom: 1rem;">Verify Hash Chain Integrity</button>
+            <div id="audit-status" style="font-weight: 600; color: #4ade80;">Chain Verified Integrity OK</div>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+    <script src="fleet.js"></script>
+    <script src="forecast.js"></script>
+    <script src="whatif.js"></script>
+</body>
+</html>

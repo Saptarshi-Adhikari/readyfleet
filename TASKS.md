@@ -22,76 +22,76 @@ The build follow a 6-phase executable strategy (**T1 through T19**):
 
 ### Phase A — Data Foundation
 
-- [ ] **T1. Project Scaffold & Configuration**
+- [x] **T1. Project Scaffold & Configuration**
   - Directories: `gen/`, `features/`, `models/`, `core/`, `api/`, `web/`, `config/`, `tests/`
   - Base files: `config/thresholds.yaml`, `requirements.txt`, `api/main.py`, `README.md`
-- [ ] **T2. SQLite Schema & DB Helper**
+- [x] **T2. SQLite Schema & DB Helper**
   - Files: `gen/schema.sql`, `gen/db.py`
   - 10 tables: `aircraft`, `component`, `sensor_reading`, `maintenance_record`, `spare`, `crew`, `sortie`, `prediction`, `scenario`, `audit_log`
-- [ ] **T3. Synthetic Generator v1 (Components & Sensors)**
+- [x] **T3. Synthetic Generator v1 (Components & Sensors)**
   - Files: `gen/degradation.py`, `gen/generate.py`
   - Multi-sensor exponential degradation curves + 5% infant mortality + no-fault units.
-- [ ] **T4. Synthetic Generator v2 (Spares, Crew, Sorties, Records) & Determinism**
+- [x] **T4. Synthetic Generator v2 (Spares, Crew, Sorties, Records) & Determinism**
   - Files: `gen/seed.py`, extend `gen/generate.py`
   - Full 5-stream data fusion + SHA-256 seed determinism verification.
 
 ### Phase B — ML Evidence
 
-- [ ] **T5. Feature Store (Single Code Path)**
+- [x] **T5. Feature Store (Single Code Path)**
   - Files: `features/build.py`
   - Windowed stats (rolling mean/std/min/max/slope over 10/30 cycles) + operational setting one-hots.
-- [ ] **T6. RUL Model Training & Evaluation**
+- [x] **T6. RUL Model Training & Evaluation**
   - Files: `models/train.py`, `models/eval.py`, `models/registry.py`
   - Capped RUL (125h) target, split by tail ID, `HistGradientBoostingRegressor` evaluation vs naive mean baseline.
-- [ ] **T7. Prediction Intervals & Inference Service**
+- [x] **T7. Prediction Intervals & Inference Service**
   - Files: `models/infer.py`
   - Quantile prediction intervals (`ci_low`, `ci_high`) written to DB per run.
 
 ### Phase C — Decision Logic
 
-- [ ] **T8. Fleet Availability Aggregator**
+- [x] **T8. Fleet Availability Aggregator**
   - Files: `core/state.py`, `core/aggregator.py`
   - Rules R1/R2/R3 translating state to MC/PMC/NMC per tail and 7-day MC-rate forecast.
-- [ ] **T9. What-If Scenario Engine**
+- [x] **T9. What-If Scenario Engine**
   - Files: `core/whatif.py`
   - Pure state patching (expedite spares, reassign crew, cannibalize) with sub-200ms latency.
-- [ ] **T10. NMC-Driver Ranker**
+- [x] **T10. NMC-Driver Ranker**
   - Files: `core/drivers.py`
   - Ranks top 5 fleet grounding constraints by impact score.
-- [ ] **T11. Cannibalization Advisor + Guardrails + Debt Ledger**
+- [x] **T11. Cannibalization Advisor + Guardrails + Debt Ledger**
   - Files: `core/cannibal.py`
   - Advisor proposing donor airframes subject to priority, NMC status, and CANN-rate limits.
-- [ ] **T12. Crew 1-Day Greedy Scheduler + Hash-Chained Audit Log**
+- [x] **T12. Crew 1-Day Greedy Scheduler + Hash-Chained Audit Log**
   - Files: `core/scheduler.py`, `core/audit.py`
   - Priority-weighted crew allocation and tamper-evident hash-chained audit logging.
 
 ### Phase D — API Layer
 
-- [ ] **T13. FastAPI Endpoints & Contracts**
+- [x] **T13. FastAPI Endpoints & Contracts**
   - Files: `api/schemas.py`, `api/routes/*.py`
   - REST endpoints for fleet status, tail details, forecasts, what-if simulations, cannibalization advice, and audit logs.
 
 ### Phase E — Canvas 2D Dashboard
 
-- [ ] **T14. Fleet Board (Canvas 2D)**
+- [x] **T14. Fleet Board (Canvas 2D)**
   - Files: `web/index.html`, `web/app.js`, `web/fleet.js`, `web/style.css`
   - Interactive grid displaying tail status cards, MC/PMC/NMC counts, and persistent `SYNTHETIC DATA` banner.
-- [ ] **T15. Tail Drill-Down & Explainability Panel**
+- [x] **T15. Tail Drill-Down & Explainability Panel**
   - Files: `web/tail.js`
   - Per-component RUL breakdown, prediction intervals, and top feature contribution text.
-- [ ] **T16. Forecast Chart & What-If Controls**
+- [x] **T16. Forecast Chart & What-If Controls**
   - Files: `web/forecast.js`, `web/whatif.js`
   - Canvas line chart of 7-day MC forecast and live scenario delta panel.
-- [ ] **T17. Cannibalization Advisor UI & Audit Log Tab**
+- [x] **T17. Cannibalization Advisor UI & Audit Log Tab**
   - Files: `web/cannibal.js`, `web/audit.js`
   - Donor selection interface with guardrail status indicators and reverse-chronological audit trail.
 
 ### Phase F — Demo & Evidence
 
-- [ ] **T18. Scripted Demo Scenario & Honesty Pass**
+- [x] **T18. Scripted Demo Scenario & Honesty Pass**
   - Files: `demo/scenario.md`
   - Pre-packaged 7-day demo script with verified MC rate deltas and honesty banner sweep.
-- [ ] **T19. Evidence Bundle & Test Suite**
+- [x] **T19. Evidence Bundle & Test Suite**
   - Files: `tests/*`, `evidence/`
   - Complete automated test suite (`pytest`) capturing evaluation metrics, determinism hash, and performance latency.
 

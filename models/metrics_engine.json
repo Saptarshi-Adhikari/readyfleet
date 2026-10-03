@@ -1,0 +1,9 @@
+{
+  "comp_class": "engine",
+  "rmse": 45.94211678113149,
+  "mae": 37.79544118946634,
+  "baseline_rmse": 41.940123379808504,
+  "baseline_mae": 37.96656870171187,
+  "train_samples": 4025,
+  "test_samples": 1189
+}

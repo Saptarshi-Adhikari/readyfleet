@@ -1,0 +1,17 @@
+# Python / Byte-code
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Database
+*.db
+*.sqlite3
+
+# Models & Large Checkpoints
+*.pkl
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

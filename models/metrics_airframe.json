@@ -1,0 +1,9 @@
+{
+  "comp_class": "airframe",
+  "rmse": 40.923744004836614,
+  "mae": 32.3933454451461,
+  "baseline_rmse": 43.05609957570109,
+  "baseline_mae": 37.85338895186277,
+  "train_samples": 4010,
+  "test_samples": 825
+}
