@@ -88,7 +88,11 @@ def verify_audit_chain():
     is_valid = verify_audit_log()
     return {"data_class": "synthetic", "chain_valid": is_valid}
 
-# Mount web directory for static dashboard frontend
-web_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "web")
-if os.path.exists(web_dir):
-    app.mount("/", StaticFiles(directory=web_dir, html=True), name="static")
+# Mount frontend static files
+frontend_dist = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend", "dist")
+if os.path.exists(frontend_dist):
+    app.mount("/", StaticFiles(directory=frontend_dist, html=True), name="static")
+else:
+    web_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "web")
+    if os.path.exists(web_dir):
+        app.mount("/", StaticFiles(directory=web_dir, html=True), name="static")
