@@ -1,5 +1,7 @@
 {
   "comp_class": "airframe",
+  "dataset_name": "N-CMAPSS",
+  "data_type": "BENCHMARK_SYNTHETIC",
   "rmse": 40.923744004836614,
   "mae": 32.3933454451461,
   "baseline_rmse": 43.05609957570109,

@@ -1,0 +1,27 @@
+sources:
+  - source_id: adsb_lol
+    name: adsb.lol
+    domain: ops
+    source_type: LIVE_REAL
+    enabled: true
+    refresh_seconds: 30
+    api_url: https://api.adsb.lol/v2/ladd
+  - source_id: awc_weather
+    name: AWC Weather API
+    domain: weather
+    source_type: LIVE_REAL
+    enabled: true
+    refresh_seconds: 180
+    api_url: https://aviationweather.gov/api/data/metar?ids=VOTV,VOHS,VIDP&format=json
+  - source_id: faa_sdrs
+    name: FAA SDRS
+    domain: maintenance
+    source_type: HISTORICAL_REAL_MAINTENANCE
+    enabled: true
+    refresh_seconds: 3600
+  - source_id: readyfleet_gen
+    name: READYFLEET Synthetic Generator
+    domain: logistics
+    source_type: SYNTHETIC
+    enabled: true
+    refresh_seconds: 0

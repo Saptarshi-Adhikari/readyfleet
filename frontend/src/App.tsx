@@ -8,6 +8,7 @@ import { ReadinessForecast } from './components/ReadinessForecast';
 import { MaintenanceControl } from './components/MaintenanceControl';
 import { WhatIfSimulator } from './components/WhatIfSimulator';
 import { CannibalizationAdvisor } from './components/CannibalizationAdvisor';
+import { DataSourcesWorkspace } from './components/DataSourcesWorkspace';
 import { AuditTrail } from './components/AuditTrail';
 
 export function App() {
@@ -44,6 +45,7 @@ export function App() {
           {activeTab === 'maintenance' && <MaintenanceControl />}
           {activeTab === 'whatif' && <WhatIfSimulator />}
           {activeTab === 'cannibalization' && <CannibalizationAdvisor />}
+          {activeTab === 'datasources' && <DataSourcesWorkspace />}
           {activeTab === 'audit' && <AuditTrail />}
         </main>
       </div>

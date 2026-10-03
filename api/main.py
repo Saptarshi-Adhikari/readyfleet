@@ -21,7 +21,21 @@ app = FastAPI(
     version="1.0.0"
 )
 
-from data_sources.manager import get_active_data_sources
+from data_sources.scheduler import scheduler_instance
+from fastapi.responses import StreamingResponse
+import asyncio
+
+@app.on_event("startup")
+async def start_background_ingestion():
+    async def periodic_ingestion():
+        while True:
+            try:
+                scheduler_instance.sync_all()
+            except Exception as e:
+                print(f"[BACKGROUND INGESTION WORKER ERROR]: {e}")
+            await asyncio.sleep(30)
+            
+    asyncio.create_task(periodic_ingestion())
 
 @app.get("/api/health")
 def health_check():
@@ -34,6 +48,69 @@ def get_data_mode():
         "data_class": "hybrid_prototype",
         "provenance": prov
     }
+
+@app.get("/api/data-sources")
+def get_data_sources_registry():
+    return {
+        "data_class": "hybrid_prototype",
+        "sources": [
+            {
+                "source_id": "adsb_lol",
+                "name": "adsb.lol",
+                "domain": "Operations",
+                "type": "LIVE_REAL",
+                "status": scheduler_instance.freshness["adsb_lol"]["status"],
+                "last_update": scheduler_instance.freshness["adsb_lol"]["last_sync"],
+                "freshness": scheduler_instance.freshness["adsb_lol"]["freshness"],
+                "enabled": True
+            },
+            {
+                "source_id": "awc_weather",
+                "name": "AWC Weather API",
+                "domain": "Weather",
+                "type": "LIVE_REAL",
+                "status": scheduler_instance.freshness["awc_weather"]["status"],
+                "last_update": scheduler_instance.freshness["awc_weather"]["last_sync"],
+                "freshness": scheduler_instance.freshness["awc_weather"]["freshness"],
+                "enabled": True
+            },
+            {
+                "source_id": "faa_sdrs",
+                "name": "FAA SDRS",
+                "domain": "Maintenance",
+                "type": "HISTORICAL_REAL_MAINTENANCE",
+                "status": scheduler_instance.freshness["faa_sdrs"]["status"],
+                "last_update": scheduler_instance.freshness["faa_sdrs"]["last_sync"],
+                "freshness": scheduler_instance.freshness["faa_sdrs"]["freshness"],
+                "enabled": True
+            },
+            {
+                "source_id": "n_cmapss",
+                "name": "N-CMAPSS",
+                "domain": "RUL ML Model",
+                "type": "BENCHMARK_SYNTHETIC",
+                "status": "READY",
+                "last_update": "STATIC_DATASET",
+                "freshness": "CURRENT",
+                "enabled": True
+            }
+        ]
+    }
+
+@app.post("/api/data-sources/sync-all")
+def sync_all_data_sources():
+    results = scheduler_instance.sync_all()
+    return {"status": "complete", "results": results}
+
+@app.get("/api/stream/events")
+async def sse_event_stream():
+    async def event_generator():
+        while True:
+            await asyncio.sleep(15)
+            data = json.dumps({"event": "ping", "ts": datetime.datetime.now().isoformat()})
+            yield f"data: {data}\n\n"
+
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
 
 @app.get("/api/fleet/status", response_model=FleetStatusResponse)
 def get_fleet_status():

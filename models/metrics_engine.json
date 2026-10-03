@@ -1,5 +1,7 @@
 {
   "comp_class": "engine",
+  "dataset_name": "N-CMAPSS",
+  "data_type": "BENCHMARK_SYNTHETIC",
   "rmse": 45.94211678113149,
   "mae": 37.79544118946634,
   "baseline_rmse": 41.940123379808504,

@@ -1,0 +1,9 @@
+source_id,source_name,organization,country,url,api_url,source_type,domain,live,historical,realness_score,classification,priority,verification_status,enabled,default_refresh_seconds
+adsb_lol,adsb.lol,adsb.lol Community,Global,https://www.adsb.lol,https://api.adsb.lol/v2/ladd,LIVE_REAL,ops,1,0,10,VERIFIED,P1,VERIFIED,1,30
+awc_weather,AWC Weather API,NOAA National Weather Service,USA,https://aviationweather.gov,https://aviationweather.gov/api/data/metar,LIVE_REAL,weather,1,1,10,VERIFIED,P1,VERIFIED,1,180
+faa_sdrs,FAA SDRS,Federal Aviation Administration,USA,https://sdrs.faa.gov,,HISTORICAL_REAL_MAINTENANCE,maintenance,0,1,10,VERIFIED,P2,VERIFIED,1,3600
+opensky_net,OpenSky Network,OpenSky Network Association,Switzerland,https://opensky-network.org,https://opensky-network.org/api/states/all,LIVE_REAL,ops,1,1,9,RESTRICTED,P3,RESTRICTED,0,300
+ntsb_avdata,NTSB Aviation Data,National Transportation Safety Board,USA,https://data.ntsb.gov/avdata,,HISTORICAL_REAL_MAINTENANCE,maintenance,0,1,10,VERIFIED,P2,VERIFIED,1,86400
+nasa_asrs,NASA ASRS,NASA,USA,https://asrs.arc.nasa.gov,,HISTORICAL_REAL_MAINTENANCE,maintenance,0,1,10,VERIFIED,P3,VERIFIED,1,86400
+n_cmapss,N-CMAPSS,NASA Ames Prognostics Center,USA,https://www.nasa.gov,,BENCHMARK_SYNTHETIC,rul,0,1,5,BENCHMARK,P1,VERIFIED,1,0
+readyfleet_gen,READYFLEET Synthetic Generator,READYFLEET,India,local,,SYNTHETIC,logistics,0,0,0,SYNTHETIC,P1,VERIFIED,1,0

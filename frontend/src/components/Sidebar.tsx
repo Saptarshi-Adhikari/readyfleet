@@ -8,6 +8,7 @@ import {
   Sliders, 
   GitCompare, 
   FileCheck2, 
+  Database,
   Radio 
 } from 'lucide-react';
 
@@ -25,7 +26,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => 
     { id: 'maintenance', label: '5. Maintenance Queue', icon: Wrench },
     { id: 'whatif', label: '6. What-If Simulator', icon: Sliders },
     { id: 'cannibalization', label: '7. Cannibalization Advisor', icon: GitCompare },
-    { id: 'audit', label: '8. Audit Trail', icon: FileCheck2 },
+    { id: 'datasources', label: '8. Master Data Fabric', icon: Database },
+    { id: 'audit', label: '9. Audit Trail', icon: FileCheck2 },
   ];
 
   return (

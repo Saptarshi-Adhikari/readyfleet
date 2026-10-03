@@ -1,5 +1,7 @@
 {
   "comp_class": "hydraulics",
+  "dataset_name": "N-CMAPSS",
+  "data_type": "BENCHMARK_SYNTHETIC",
   "rmse": 40.11677095332124,
   "mae": 32.61462927523684,
   "baseline_rmse": 42.476148178491606,

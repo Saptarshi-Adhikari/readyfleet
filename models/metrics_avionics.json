@@ -1,5 +1,7 @@
 {
   "comp_class": "avionics",
+  "dataset_name": "N-CMAPSS",
+  "data_type": "BENCHMARK_SYNTHETIC",
   "rmse": 37.228249351416125,
   "mae": 29.714442652580065,
   "baseline_rmse": 42.34235321462739,
