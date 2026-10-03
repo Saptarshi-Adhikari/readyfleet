@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 export interface StreamEvent {
+  id?: string;
   event: string;
   source_id?: string;
   timestamp?: string;
@@ -10,6 +11,7 @@ export interface StreamEvent {
 export function useLiveEvents(onEvent?: (evt: StreamEvent) => void) {
   const [isConnected, setIsConnected] = useState(false);
   const [lastEvent, setLastEvent] = useState<StreamEvent | null>(null);
+  const seenEventIds = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     let eventSource: EventSource | null = null;
@@ -27,6 +29,20 @@ export function useLiveEvents(onEvent?: (evt: StreamEvent) => void) {
       eventSource.onmessage = (e) => {
         try {
           const parsed: StreamEvent = JSON.parse(e.data);
+          const eventKey = parsed.id || `${parsed.event}-${parsed.source_id}-${parsed.timestamp}`;
+          
+          if (seenEventIds.current.has(eventKey)) {
+            // Duplicate event - skip processing
+            return;
+          }
+          
+          seenEventIds.current.add(eventKey);
+          // Keep set bounded to last 200 events
+          if (seenEventIds.current.size > 200) {
+            const firstKey = Array.from(seenEventIds.current)[0];
+            seenEventIds.current.delete(firstKey);
+          }
+
           setLastEvent(parsed);
           if (onEvent) {
             onEvent(parsed);

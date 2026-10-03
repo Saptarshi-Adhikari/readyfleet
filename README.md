@@ -35,6 +35,29 @@ READYFLEET solves aircraft availability bottlenecks by fusing 5 data streams int
 
 ---
 
+## 🎯 System Positioning & Data Provenance Architecture
+
+READYFLEET operates strictly as a:
+> **Digital Twin Prototype / Simulated Fleet Twin with Live Public Operational & Weather Data**
+
+### Data Stream Classification & Provenance Boundaries:
+- **REAL (`LIVE_REAL` / `HISTORICAL_REAL`):**
+  - Live Public Flight Operations (`adsb.lol` API — ADS-B positional tracking)
+  - Live Aviation Weather (`AWC Weather API` — NOAA METAR environmental observations)
+  - Historical Maintenance Records (`FAA SDRS` — Service Difficulty Reporting System)
+  - Historical Safety & Incident Information (`NTSB` Aviation Accident Database)
+- **BENCHMARK (`BENCHMARK_SYNTHETIC`):**
+  - RUL Model Training (`NASA N-CMAPSS` Turbofan Engine Degradation Dataset)
+- **SYNTHETIC / CONFIGURED (`CONFIGURED_SYNTHETIC`):**
+  - Defence HUMS Telemetry Placeholder
+  - Crew Capacity & Skill Mix
+  - Spares & Supply Chain Inventory
+  - Authoritative Fleet Readiness Classification (`MC` / `PMC` / `NMC`)
+
+*Architectural Boundary Note:* Authorized defence HUMS and maintenance-management feeds can replace these synthetic fallback streams directly without requiring any changes to the overarching decision engine or web console interface.
+
+---
+
 ## ⚡ Quick Start Command
 
 To initialize project dependencies and execute the complete pipeline once implementation begins:

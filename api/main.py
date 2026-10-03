@@ -88,12 +88,14 @@ def get_data_sources_registry():
 
 import json
 import datetime
+import uuid
 
 # Active SSE subscriber queues
 sse_subscribers: List[asyncio.Queue] = []
 
 async def broadcast_sse_event(event_type: str, source_id: str, data: Dict[str, Any]):
     evt_payload = {
+        "id": f"evt-{uuid.uuid4().hex[:12]}",
         "event": event_type,
         "source_id": source_id,
         "timestamp": datetime.datetime.now().isoformat(),
