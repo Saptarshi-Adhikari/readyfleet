@@ -83,6 +83,99 @@ def request_cannibalization_advice(req: CannibalRequest):
         details=details
     )
 
+@app.get("/api/aircraft/{tail_no}")
+def get_aircraft_detail(tail_no: str):
+    state = load_fleet_state()
+    ac_df = state["aircraft"]
+    ac_row = ac_df[ac_df["tail_no"] == tail_no]
+    if ac_row.empty:
+        raise HTTPException(status_code=404, detail="Aircraft tail number not found")
+        
+    ac_info = ac_row.iloc[0].to_dict()
+    
+    # Get components and predictions
+    comps_df = state["components"]
+    ac_comps = comps_df[comps_df["tail_no"] == tail_no]
+    preds_df = state["predictions"]
+    
+    components_detail = []
+    blocking_constraint = None
+    
+    for _, comp in ac_comps.iterrows():
+        comp_id = comp["id"]
+        pred_row = preds_df[preds_df["component_id"] == comp_id]
+        rul = pred_row["predicted_rul_h"].values[0] if not pred_row.empty else 999.0
+        ci_low = pred_row["ci_low"].values[0] if not pred_row.empty else 0.0
+        ci_high = pred_row["ci_high"].values[0] if not pred_row.empty else 999.0
+        
+        comp_data = {
+            "id": int(comp["id"]),
+            "comp_class": comp["comp_class"],
+            "serial_no": comp["serial_no"],
+            "installed_cycles": int(comp["installed_cycles"]),
+            "installed_hours": float(comp["installed_hours"]),
+            "predicted_rul_h": float(rul),
+            "ci_low": float(ci_low),
+            "ci_high": float(ci_high),
+            "threshold_h": 24.0,
+            "status": "CRITICAL" if rul < 24.0 else "HEALTHY"
+        }
+        components_detail.append(comp_data)
+        
+        if rul < 24.0 and blocking_constraint is None:
+            blocking_constraint = {
+                "reason": f"{comp['comp_class'].upper()} RUL ({rul:.1f}h) BELOW 24h THRESHOLD",
+                "required_action": f"Perform {comp['comp_class']} overhaul / replacement",
+                "required_spare": f"PART-{comp['comp_class'][:3].upper()}-01",
+                "required_trade": comp["comp_class"],
+                "est_duration": "4.5 Hours"
+            }
+            
+    eval_res = evaluate_fleet_availability(state)
+    reasons = eval_res["tail_grounding_reasons"].get(tail_no, [])
+
+    return {
+        "data_class": "synthetic",
+        "aircraft": ac_info,
+        "components": components_detail,
+        "grounding_reasons": reasons,
+        "blocking_constraint": blocking_constraint or {
+            "reason": "NONE - AIRCRAFT IS FLYABLE / MC",
+            "required_action": "Standard Pre-Flight Inspection",
+            "required_spare": "NONE",
+            "required_trade": "AVIONICS",
+            "est_duration": "1.0 Hour"
+        }
+    }
+
+@app.get("/api/maintenance/overview")
+def get_maintenance_overview():
+    state = load_fleet_state()
+    spares_df = state["spares"].to_dict(orient="records")
+    crew_df = state["crew"].to_dict(orient="records")
+    eval_res = evaluate_fleet_availability(state)
+    
+    # Maintenance Queue derived from NMC & PMC tails
+    queue = []
+    for tail, status in eval_res["tail_states"].items():
+        if status in ["NMC", "PMC"]:
+            reasons = eval_res["tail_grounding_reasons"].get(tail, ["Scheduled Service Required"])
+            queue.append({
+                "tail_no": tail,
+                "status": status,
+                "issue": reasons[0] if reasons else "Routine Inspection",
+                "priority": "P1" if status == "NMC" else "P2",
+                "required_action": "Inspect & Replace Component",
+                "est_duration": "4.0h"
+            })
+
+    return {
+        "data_class": "synthetic",
+        "queue": queue,
+        "spares": spares_df,
+        "crew": crew_df
+    }
+
 @app.get("/api/audit/verify")
 def verify_audit_chain():
     is_valid = verify_audit_log()
