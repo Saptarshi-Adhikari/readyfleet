@@ -168,8 +168,8 @@ export const AircraftDetail: React.FC<AircraftDetailProps> = ({ tailNo, onBack }
                   </div>
 
                   <div className="flex justify-between text-[10px] text-slate-500">
-                    <span>CONFIDENCE BOUNDS:</span>
-                    <span>{comp.ci_low.toFixed(1)}h - {comp.ci_high.toFixed(1)}h</span>
+                    <span>ESTIMATED ERROR RANGE (±1.5× MAE):</span>
+                    <span className="font-mono text-slate-300">{comp.ci_low.toFixed(1)}h – {comp.ci_high.toFixed(1)}h</span>
                   </div>
 
                   <div className="flex justify-between text-[10px] text-slate-500">

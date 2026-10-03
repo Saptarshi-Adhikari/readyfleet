@@ -33,7 +33,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => 
       <div>
         <div className="p-4 border-b border-[#1e293b] flex items-center space-x-3">
           <div className="p-2 bg-[#0284c7]/20 border border-[#0284c7] rounded-sm text-[#38bdf8]">
-            <Radio className="w-5 h-5 animate-pulse" />
+            <Radio className="w-5 h-5" />
           </div>
           <div>
             <h1 className="text-base font-bold tracking-wider text-slate-100">READYFLEET</h1>
