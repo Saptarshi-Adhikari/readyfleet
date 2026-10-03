@@ -102,7 +102,7 @@ def generate_all_data(db_path: str = DB_PATH, seed: int = SEED) -> None:
 
         # Create Digital Twin Registry Instance
         twin_id = f"DT-{tail_no}"
-        now_str = datetime.datetime.now().isoformat()
+        now_str = "2026-10-04T00:00:00"
         with conn:
             conn.execute(
                 "INSERT INTO digital_twin (twin_id, tail_no, twin_state, data_mode, last_sync_ts, sync_status, synthetic) "
