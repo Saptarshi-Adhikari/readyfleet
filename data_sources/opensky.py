@@ -34,12 +34,18 @@ class OpenSkyDataSource(BaseDataSource):
     def normalize(self, raw_state: list) -> Dict[str, Any]:
         icao24 = raw_state[0] if len(raw_state) > 0 else "unknown"
         callsign = raw_state[1].strip() if len(raw_state) > 1 and raw_state[1] else icao24
+        on_ground = raw_state[8] if len(raw_state) > 8 else True
+        op_state = "ON_GROUND" if on_ground else "AIRBORNE"
+        
         return {
             "tail_no": f"ADS-{callsign.upper()}",
             "type": "Commercial/GA",
             "base": "Live-Airspace",
-            "mission_priority": 1,
-            "status": "MC" if not raw_state[8] else "PMC",  # on_ground boolean
+            "operational_state": op_state,
+            "status": "UNKNOWN",  # Do not infer MC/PMC/NMC from ADS-B visibility
+            "latitude": raw_state[6] if len(raw_state) > 6 else None,
+            "longitude": raw_state[5] if len(raw_state) > 5 else None,
+            "altitude": raw_state[7] if len(raw_state) > 7 else None,
             "synthetic": 0,
             "provenance": self.get_provenance(record_id=icao24, is_synthetic=0)
         }

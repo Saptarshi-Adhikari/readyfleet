@@ -9,12 +9,16 @@ from gen.db import DB_PATH
 
 COMP_CLASSES = ["engine", "avionics", "hydraulics", "airframe"]
 
-def train_rul_models(db_path: str = DB_PATH) -> Dict[str, Dict[str, float]]:
+def train_rul_models(db_path: str = DB_PATH, dataset_name: str = "N-CMAPSS", data_type: str = "BENCHMARK_SYNTHETIC") -> Dict[str, Dict[str, float]]:
+    print(f"\n--- Initiating RUL Model Training ---")
+    print(f"Dataset Name: {dataset_name} | Data Type: {data_type}")
+    
     all_metrics = {}
     
     for comp_class in COMP_CLASSES:
         X, y, tails = build_dataset_for_class(db_path, comp_class)
-        if X.empty:
+        if X.empty or y.isnull().all():
+            print(f"Dataset '{dataset_name}' for class '{comp_class}' is missing valid longitudinal RUL targets. Skipping RUL training.")
             continue
 
         # Split BY TAIL (no data leakage across tails)
@@ -51,6 +55,8 @@ def train_rul_models(db_path: str = DB_PATH) -> Dict[str, Dict[str, float]]:
 
         metrics = {
             "comp_class": comp_class,
+            "dataset_name": dataset_name,
+            "data_type": data_type,
             "rmse": rmse,
             "mae": mae,
             "baseline_rmse": base_rmse,
@@ -65,5 +71,11 @@ def train_rul_models(db_path: str = DB_PATH) -> Dict[str, Dict[str, float]]:
     return all_metrics
 
 if __name__ == "__main__":
-    results = train_rul_models()
-    print("Trained models for all component classes.")
+    import argparse
+    parser = argparse.ArgumentParser(description="READYFLEET RUL Model Training CLI")
+    parser.add_argument("--dataset", type=str, default="N-CMAPSS", help="Dataset name used for training")
+    parser.add_argument("--data-type", type=str, default="BENCHMARK_SYNTHETIC", choices=["BENCHMARK_SYNTHETIC", "REAL_HISTORICAL", "READYFLEET_SYNTHETIC"], help="Data type classification")
+    args = parser.parse_args()
+
+    results = train_rul_models(dataset_name=args.dataset, data_type=getattr(args, "data_type"))
+    print("Trained and registered models for all component classes.")
