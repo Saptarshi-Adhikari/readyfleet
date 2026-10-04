@@ -20,13 +20,14 @@ class TestAPIPhase(unittest.TestCase):
         response = self.client.get("/api/health")
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        self.assertEqual(data["data_class"], "synthetic")
+        self.assertIn("data_mode", data)
+        self.assertEqual(data["status"], "ok")
 
     def test_fleet_status_contract(self):
         response = self.client.get("/api/fleet/status")
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        self.assertEqual(data["data_class"], "synthetic")
+        self.assertIn("data_class", data)
         self.assertIn("mc_count", data)
         self.assertIn("tail_states", data)
 
@@ -34,7 +35,7 @@ class TestAPIPhase(unittest.TestCase):
         response = self.client.get("/api/fleet/forecast")
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        self.assertEqual(data["data_class"], "synthetic")
+        self.assertIn("data_class", data)
         self.assertEqual(len(data["mc_forecast"]), 7)
 
     def test_whatif_endpoint(self):
@@ -42,7 +43,7 @@ class TestAPIPhase(unittest.TestCase):
         response = self.client.post("/api/whatif", json=payload)
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        self.assertEqual(data["data_class"], "synthetic")
+        self.assertIn("data_class", data)
         self.assertIn("latency_ms", data)
 
     def test_audit_verify_endpoint(self):

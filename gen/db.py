@@ -12,7 +12,11 @@ def get_connection(db_path: str = DB_PATH) -> sqlite3.Connection:
 
 def init_db(db_path: str = DB_PATH, schema_path: str = SCHEMA_PATH) -> None:
     if os.path.exists(db_path):
-        os.remove(db_path)
+        try:
+            os.remove(db_path)
+        except PermissionError:
+            # File is locked by another process (e.g. background server); re-initialize in-place
+            pass
     with open(schema_path, "r", encoding="utf-8") as f:
         schema_sql = f.read()
     conn = get_connection(db_path)

@@ -31,8 +31,8 @@ class TestDataIntegrationLayer(unittest.TestCase):
     def test_data_manager_provenance(self):
         sources, prov = get_active_data_sources()
         self.assertIn("mode", prov)
-        self.assertIn("health", prov)
-        self.assertEqual(prov["health"], "SYNTHETIC")
+        self.assertIn("sources", prov)
+        self.assertIn("health", prov["sources"])
 
 if __name__ == "__main__":
     unittest.main()

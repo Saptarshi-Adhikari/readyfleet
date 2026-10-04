@@ -66,8 +66,8 @@ class TestLiveIngestionFabric(unittest.TestCase):
         results = sched.sync_all()
         self.assertIn("adsb_lol", results)
         self.assertIn("awc_weather", results)
-        self.assertIn(results["adsb_lol"]["status"], ["synced", "fallback", "SUCCESS", "FALLBACK_USED"])
-        self.assertIn(results["awc_weather"]["status"], ["synced", "fallback", "SUCCESS", "FALLBACK_USED"])
+        self.assertIn(results["adsb_lol"]["status"], ["ONLINE", "RATE_LIMITED", "DEGRADED", "OFFLINE", "synced"])
+        self.assertIn(results["awc_weather"]["status"], ["ONLINE", "RATE_LIMITED", "DEGRADED", "OFFLINE", "synced"])
 
     def test_error_recovery_graceful(self):
         adapter = ADSBLolDataSource()
