@@ -85,7 +85,11 @@ background_task_handle: Optional[asyncio.Task] = None
 
 @app.on_event("startup")
 async def start_background_ingestion():
-    """Launch the periodic data ingestion background worker cleanly."""
+    """Launch the periodic data ingestion background worker cleanly (local/daemon only)."""
+    if os.environ.get("VERCEL") or os.environ.get("VERCEL_ENV"):
+        # Serverless mode: Vercel Cron owns scheduled ingestion. Do not launch permanent loop.
+        return
+
     global background_task_handle
     if background_task_handle is not None and not background_task_handle.done():
         return
@@ -135,18 +139,62 @@ async def stop_background_ingestion():
 
 @app.get("/api/health")
 def health_check():
+    from gen.db import get_database_backend, get_connection
     mode = get_data_mode()
+    backend = get_database_backend()
+
+    db_status = "healthy"
+    try:
+        conn = get_connection()
+        conn.close()
+    except Exception as e:
+        db_status = "unavailable"
+
     sources_summary = {
         s_id: scheduler_instance.freshness.get(s_id, {}).get("status", "UNKNOWN")
         for s_id in ["adsb_lol", "awc_weather", "faa_sdrs"]
     }
+
+    status_str = "ok" if db_status == "healthy" else "degraded"
+
     return {
-        "status": "ok",
+        "status": status_str,
         "service": "READYFLEET API",
         "version": "2.0.0",
         "data_mode": mode,
+        "database": backend,
+        "database_status": db_status,
         "sources": sources_summary,
         "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+    }
+
+
+@app.get("/api/cron/ingest")
+@app.post("/api/cron/ingest")
+def vercel_cron_ingestion(authorization: Optional[str] = None, cron_token: Optional[str] = None):
+    """
+    Vercel Cron Ingestion Function Endpoint.
+    Triggered periodically by Vercel Cron to sync live data sources (adsb_lol, awc_weather)
+    and update persistent database state in serverless production mode.
+    """
+    cron_secret = os.environ.get("CRON_SECRET")
+    if cron_secret:
+        auth_ok = False
+        if authorization and authorization.startswith("Bearer "):
+            if authorization.split(" ")[1] == cron_secret:
+                auth_ok = True
+        elif cron_token == cron_secret:
+            auth_ok = True
+
+        if not auth_ok:
+            raise HTTPException(status_code=401, detail="Unauthorized Cron Execution")
+
+    results = scheduler_instance.sync_all()
+    return {
+        "status": "success",
+        "data_mode": get_data_mode(),
+        "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        "results": results,
     }
 
 

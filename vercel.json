@@ -18,6 +18,12 @@
       ]
     }
   },
+  "crons": [
+    {
+      "path": "/api/cron/ingest",
+      "schedule": "*/5 * * * *"
+    }
+  ],
   "rewrites": [
     {
       "source": "/api/(.*)",
