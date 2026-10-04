@@ -37,7 +37,7 @@ def verify(base_url: str = DEFAULT_HOST):
             with urllib.request.urlopen(req, timeout=10) as res:
                 data = json.loads(res.read().decode("utf-8"))
                 status = res.status
-                print(f"  ✓ {ep} -> HTTP {status}")
+                print(f"  [OK] {ep} -> HTTP {status}")
                 if ep == "/api/health":
                     mode = data.get("data_mode")
                     db = data.get("database")
@@ -46,7 +46,7 @@ def verify(base_url: str = DEFAULT_HOST):
                     if mode != "REAL_ONLY":
                         print(f"    WARNING: data_mode is {mode}, expected REAL_ONLY")
         except Exception as e:
-            print(f"  ✗ {ep} -> ERROR: {e}")
+            print(f"  [ERROR] {ep} -> ERROR: {e}")
             all_ok = False
 
     if all_ok:
