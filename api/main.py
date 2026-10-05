@@ -8,11 +8,20 @@ DATA_MODE is enforced globally: synthetic data cannot silently populate
 real-data API responses in REAL_ONLY mode.
 """
 
+import os
+import sys
+
+# Ensure the project root is on sys.path so that package imports
+# (api.*, core.*, data_sources.*, gen.*, ml.*) resolve correctly
+# in Vercel's serverless runtime where CWD may differ.
+_PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if _PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, _PROJECT_ROOT)
+
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse, StreamingResponse
 from typing import List, Dict, Any, Optional
-import os
 import json
 import datetime
 import uuid
@@ -81,12 +90,14 @@ async def broadcast_sse_event(event_type: str, source_id: str, data: Dict[str, A
 # Background Ingestion
 # ─────────────────────────────────────────────────────────────────────────────
 
+IS_VERCEL = bool(os.environ.get("VERCEL") or os.environ.get("VERCEL_ENV"))
+
 background_task_handle: Optional[asyncio.Task] = None
 
 @app.on_event("startup")
 async def start_background_ingestion():
     """Launch the periodic data ingestion background worker cleanly (local/daemon only)."""
-    if os.environ.get("VERCEL") or os.environ.get("VERCEL_ENV"):
+    if IS_VERCEL:
         # Serverless mode: Vercel Cron owns scheduled ingestion. Do not launch permanent loop.
         return
 
@@ -738,13 +749,15 @@ def verify_audit_chain():
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Static Frontend
+# Static Frontend (local dev only — Vercel serves static assets directly)
 # ─────────────────────────────────────────────────────────────────────────────
 
-frontend_dist = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend", "dist")
-if os.path.exists(frontend_dist):
-    app.mount("/", StaticFiles(directory=frontend_dist, html=True), name="static")
-else:
-    web_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "web")
-    if os.path.exists(web_dir):
-        app.mount("/", StaticFiles(directory=web_dir, html=True), name="static")
+if not IS_VERCEL:
+    frontend_dist = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend", "dist")
+    if os.path.exists(frontend_dist):
+        app.mount("/", StaticFiles(directory=frontend_dist, html=True), name="static")
+    else:
+        web_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "web")
+        if os.path.exists(web_dir):
+            app.mount("/", StaticFiles(directory=web_dir, html=True), name="static")
+

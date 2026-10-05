@@ -42,18 +42,37 @@ def get_connection(db_path: str = DB_PATH) -> Any:
         return conn
     else:
         # SQLite local dev / testing fallback
+        # On Vercel the project filesystem is read-only — always use /tmp.
+        is_vercel = bool(os.environ.get("VERCEL") or os.environ.get("VERCEL_ENV"))
+        if is_vercel:
+            db_path = os.path.join("/tmp", "readyfleet.db")
         try:
             conn = sqlite3.connect(db_path)
         except sqlite3.OperationalError:
             # Fallback to /tmp if local filesystem is read-only
-            tmp_db = os.path.join("/tmp", "readyfleet.db")
-            conn = sqlite3.connect(tmp_db)
+            db_path = os.path.join("/tmp", "readyfleet.db")
+            conn = sqlite3.connect(db_path)
 
         conn.row_factory = sqlite3.Row
         try:
             conn.execute("PRAGMA foreign_keys = ON;")
         except Exception:
             pass
+
+        # Auto-initialize on cold start if tables don't exist yet
+        try:
+            conn.execute("SELECT 1 FROM aircraft LIMIT 1")
+        except sqlite3.OperationalError:
+            # Tables missing — init schema and seed data
+            try:
+                with open(SCHEMA_PATH, "r", encoding="utf-8") as f:
+                    conn.executescript(f.read())
+                # Attempt to seed initial data
+                from gen.generate import generate_all_data
+                generate_all_data(db_path)
+            except Exception:
+                pass
+
         return conn
 
 def init_db(db_path: str = DB_PATH, schema_path: str = SCHEMA_PATH) -> None:
